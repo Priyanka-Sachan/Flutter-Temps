@@ -1,36 +1,45 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class CategoryCard extends StatelessWidget {
-  final String id;
-  final String title;
-  final IconData icon;
+import './recipe_page.dart';
+import '../models/category.dart';
 
-  CategoryCard(this.id, this.title, this.icon);
+class CategoryCard extends StatelessWidget {
+  final Category category;
+
+  CategoryCard(this.category);
+
+  void navigateToRecipePage(BuildContext c,Category category){
+    Navigator.of(c).pushNamed(RecipePage.routeName,arguments: category);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-        color: Colors.grey.shade600,
-        elevation: 0,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: <Widget>[
-              Expanded(
-                  flex: 1,
-                  child: Text(
-                    title,
-                    textScaleFactor: 1.5,
-                  )),
-              Icon(
-                icon,
-                size: 80,
-              )
-            ],
-          ),
-        ));
+    return InkWell(
+      onTap: ()=>navigateToRecipePage(context,category),
+      splashColor: Theme.of(context).accentColor,
+      child: Card(
+        margin: EdgeInsets.symmetric(vertical: 0,horizontal: 8),
+          color: Colors.teal.shade50,
+          elevation: 0,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                Expanded(
+                    flex: 1,
+                    child: Text(
+                      category.title,
+                      textScaleFactor: 2,
+                    )),
+                Icon(
+                  category.icon,
+                  size: 80,
+                )
+              ],
+            ),
+          )),
+    );
   }
 }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import './widgets/tab_bar_page.dart';
+import './widgets/recipe_details_page.dart';
+import './widgets/recipe_page.dart';
 import './widgets/categories_page.dart';
 
 void main() {
@@ -14,27 +17,16 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           primarySwatch: Colors.grey,
           primaryColor: Colors.grey.shade500,
-          accentColor: Colors.pinkAccent,
+          accentColor: Colors.tealAccent,
           fontFamily: 'Quicksand'),
-      home: Scaffold(
-        backgroundColor: Colors.grey.shade500,
-        appBar: AppBar(
-          elevation: 0.0,
-          backgroundColor: Colors.transparent,
-          title: Text(
-            'Meeeals',
-            textScaleFactor: 1.8,
-            style: TextStyle(
-              letterSpacing: 1.5
-            ),
-          ),
-          leading: Icon(
-            Icons.fastfood,
-          ),
-        ),
-        body: CategoriesPage(),
-      ),
+      routes: {
+        '/': (ctx) => TabBarPage(),
+        RecipePage.routeName: (ctx) => RecipePage(),
+        RecipeDetailsPage.routeName: (ctx) => RecipeDetailsPage()
+      },
+      onUnknownRoute: (settings) {
+        return MaterialPageRoute(builder: (context) => CategoriesPage());
+      },
     );
   }
 }
-
