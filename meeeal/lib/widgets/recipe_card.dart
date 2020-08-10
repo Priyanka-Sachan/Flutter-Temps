@@ -5,12 +5,19 @@ import '../models/recipe.dart';
 
 class RecipeCard extends StatelessWidget {
   final Recipe recipe;
+  final Function removeItem;
 
-  RecipeCard(this.recipe);
+  RecipeCard(this.recipe, this.removeItem);
+
+  String seenRecipeId;
 
   void selectRecipe(BuildContext context, Recipe recipe) {
     Navigator.of(context)
-        .pushNamed(RecipeDetailsPage.routeName, arguments: recipe);
+        .pushNamed(RecipeDetailsPage.routeName, arguments: recipe)
+        .then((value) {
+      seenRecipeId = value;
+      if (seenRecipeId != null) removeItem(seenRecipeId);
+    });
   }
 
   @override

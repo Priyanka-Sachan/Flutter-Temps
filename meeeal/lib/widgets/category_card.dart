@@ -32,14 +32,16 @@ class CategoryCard extends StatelessWidget {
                     child: Text(
                       category.title,
                       textScaleFactor: 2,
-                    )),
+                    ),
+                ),
                 Icon(
                   category.icon,
                   size: 80,
-                )
+                ),
               ],
             ),
-          )),
+          ),
+      ),
     );
   }
 }

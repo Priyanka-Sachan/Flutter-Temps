@@ -5,7 +5,7 @@ import '../models/category.dart';
 import './category_card.dart';
 
 class CategoriesPage extends StatelessWidget {
-  List<Category> dummyData = DUMMY_CATEGORIES;
+  final List<Category> dummyData = DUMMY_CATEGORIES;
   @override
   Widget build(BuildContext context) {
     return Container(
