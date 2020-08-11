@@ -17,13 +17,18 @@ class CartScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: IconThemeData(
+            color: Theme.of(context).accentColor
+        ),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.airport_shuttle,
+            icon: Icon(
+              Icons.airport_shuttle,
               color: Theme.of(context).accentColor,
               size: 32,
             ),
-            onPressed: ()=>Navigator.of(context).pushNamed(OrdersScreen.routeName),
+            onPressed: () =>
+                Navigator.of(context).pushNamed(OrdersScreen.routeName),
           )
         ],
         title: Text(
@@ -36,7 +41,18 @@ class CartScreen extends StatelessWidget {
         children: <Widget>[
           Expanded(
             flex: 1,
-            child: ListView.builder(
+            child: cart.cartProducts.length==0?Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  Icons.shopping_cart,
+                  size:300
+                ),
+                Text('Your cart is empty!',
+                style: Theme.of(context).textTheme.headline4,)
+              ],
+            ):ListView.builder(
               itemBuilder: (ctx, index) =>
                   CartItem(cart.cartProducts.values.toList()[index]),
               itemCount: cart.getCartCount(),
@@ -59,7 +75,7 @@ class CartScreen extends StatelessWidget {
                   style: Theme.of(context).textTheme.headline6,
                 ),
                 onPressed: () {
-                  if(cart.cartProducts.length>0) {
+                  if (cart.cartProducts.length > 0) {
                     Provider.of<Orders>(context, listen: false).addOrder(
                         cart.cartProducts.values.toList(), cart.totalAmount);
                     cart.clearCart();

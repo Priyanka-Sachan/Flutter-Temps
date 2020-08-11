@@ -18,6 +18,9 @@ class ProductDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: IconThemeData(
+            color: Theme.of(context).accentColor
+        ),
         title: Text(
           product.title,
           style: Theme.of(context).textTheme.headline5,
@@ -54,13 +57,19 @@ class ProductDetailsScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text(
-                      product.title,
-                      style: TextStyle(color: Colors.white, fontSize: 24),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        product.title,
+                        style: TextStyle(color: Colors.white, fontSize: 24),
+                      ),
                     ),
-                    Text(
-                      'Rs.${product.price.toString()}',
-                      style: TextStyle(color: Colors.white, fontSize: 24),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        'Rs.${product.price.toString()}',
+                        style: TextStyle(color: Colors.white, fontSize: 24),
+                      ),
                     ),
                   ],
                 ),

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:mallatweb/providers/orders.dart';
-import 'package:mallatweb/widgets/orders_screen.dart';
 import 'package:provider/provider.dart';
 
+import './providers/product.dart';
+import './widgets/edit_product_screen.dart';
+import './widgets/manage_product_screen.dart';
+import './providers/orders.dart';
+import './widgets/orders_screen.dart';
 import './widgets/cart_screen.dart';
 import './widgets/product_details_screen.dart';
 import './widgets/products_overview_screen.dart';
@@ -25,6 +28,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
+              primaryColor: Color.fromRGBO(68, 44, 46, 1),
               primaryColorLight: Colors.pink.shade50,
               primaryColorDark: Colors.pink.shade200,
               accentColor: Color.fromRGBO(68, 44, 46, 1),
@@ -35,6 +39,8 @@ class MyApp extends StatelessWidget {
             ProductDetailsScreen.routeName: (ctx) => ProductDetailsScreen(),
             CartScreen.routeName: (ctx) => CartScreen(),
             OrdersScreen.routeName: (ctx) => OrdersScreen(),
+            ManageProductScreen.routeName: (ctx) => ManageProductScreen(),
+            EditProductScreen.routeName: (ctx) => EditProductScreen(Product()),
           }),
     );
   }

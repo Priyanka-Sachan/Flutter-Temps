@@ -44,7 +44,19 @@ class ProductsOverviewItem extends StatelessWidget {
               Icons.shopping_cart,
               color: Colors.white,
             ),
-            onPressed: () => cart.addProductToCart(product),
+            onPressed: () {
+              cart.addProductToCart(product);
+              Scaffold.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Added to the Cart!'),
+                  action: SnackBarAction(
+                    textColor: Colors.white,
+                    label: 'UNDO',
+                    onPressed: () => cart.changeProductQuantity(product.id, -1),
+                  ),
+                ),
+              );
+            },
           ),
           backgroundColor: Colors.black54,
         ),

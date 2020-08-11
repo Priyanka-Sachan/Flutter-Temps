@@ -11,9 +11,29 @@ class CartItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Cart cart= Provider.of<Cart>(context, listen: false);
+    Cart cart = Provider.of<Cart>(context, listen: false);
 
     return Dismissible(
+      confirmDismiss: (direction) {
+        return showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+                  title: Text('Are you sure?'),
+                  content:
+                      Text('Do you want to remove the item from the card?'),
+                  actions: <Widget>[
+                    FlatButton(
+                      child: Text('CANCEL'),
+                      onPressed: () {},
+                    ),
+                    FlatButton(
+                      child: Text('DELETE'),
+                      onPressed: () {},
+                    )
+                  ],
+                ),
+        );
+      },
       background: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: Container(
@@ -81,7 +101,9 @@ class CartItem extends StatelessWidget {
                         icon: Icon(
                           Icons.add_circle,
                           size: 32,
-                        ), onPressed: ()=>cart.changeProductQuantity(cartProduct.id, 1),
+                        ),
+                        onPressed: () =>
+                            cart.changeProductQuantity(cartProduct.id, 1),
                       ),
                       Text(
                         cartProduct.quantity.toString(),
@@ -92,7 +114,9 @@ class CartItem extends StatelessWidget {
                         icon: Icon(
                           Icons.remove_circle,
                           size: 32,
-                        ), onPressed: ()=>cart.changeProductQuantity(cartProduct.id, -1),
+                        ),
+                        onPressed: () =>
+                            cart.changeProductQuantity(cartProduct.id, -1),
                       ),
                     ],
                   ),

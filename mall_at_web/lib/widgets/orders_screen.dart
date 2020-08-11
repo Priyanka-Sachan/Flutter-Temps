@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../providers/orders.dart';
 import 'package:provider/provider.dart';
+
+import '../providers/orders.dart';
 import './order_item.dart';
 
 class OrdersScreen extends StatelessWidget {
-
-  static const routeName='/orders-screen';
+  static const routeName = '/orders-screen';
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +16,9 @@ class OrdersScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: IconThemeData(
+            color: Theme.of(context).accentColor
+        ),
         title: Text(
           'My Orders',
           style: Theme.of(context).textTheme.headline4,

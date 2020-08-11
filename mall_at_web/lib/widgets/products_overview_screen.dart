@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:mallatweb/widgets/cart_screen.dart';
+import './manage_product_screen.dart';
 import 'package:provider/provider.dart';
 
+import './cart_screen.dart';
 import '../providers/cart.dart';
 import './badge.dart';
 import '../providers/products_provider.dart';
 import './products_overview_item.dart';
 
-enum filterOptions { Favourites, All }
+enum filterOptions { Favourites, All,Add }
 
 class ProductsOverviewScreen extends StatefulWidget {
   @override
@@ -17,14 +18,13 @@ class ProductsOverviewScreen extends StatefulWidget {
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   bool _showFavourites = false;
 
-  void navigateToCart(){
+  void navigateToCart() {
     Navigator.of(context).pushNamed(CartScreen.routeName);
   }
 
   @override
   Widget build(BuildContext context) {
     final productsData = Provider.of<Products>(context, listen: false);
-    // final cart = Provider.of<Cart>(context, listen: false).cartProducts;
     final products = _showFavourites
         ? productsData.getFavouriteProducts()
         : productsData.getProducts();
@@ -45,19 +45,18 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
         ),
         titleSpacing: 2,
         actions: <Widget>[
-          Consumer<Cart>(
-            builder: (ctx, cart, ch)  {
-              return Badge(
+          Consumer<Cart>(builder: (ctx, cart, ch) {
+            return Badge(
               child: IconButton(
-                icon: Icon(Icons.shopping_cart,
+                icon: Icon(
+                  Icons.shopping_cart,
                   color: Theme.of(context).accentColor,
                 ),
                 onPressed: navigateToCart,
               ),
               value: cart.getCartCount().toString(),
             );
-            }
-          ),
+          }),
           PopupMenuButton(
             padding: EdgeInsets.all(8),
             shape:
@@ -66,8 +65,11 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
               setState(() {
                 if (selectedValue == filterOptions.Favourites)
                   _showFavourites = true;
-                else
+                else if(selectedValue == filterOptions.All)
                   _showFavourites = false;
+                else {
+                  Navigator.of(context).pushNamed(ManageProductScreen.routeName);
+                }
               });
             },
             icon: Icon(
@@ -82,6 +84,10 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
               PopupMenuItem(
                 child: Text('Show All'),
                 value: filterOptions.All,
+              ),
+              PopupMenuItem(
+                child: Text('Your Products'),
+                value: filterOptions.Add,
               ),
             ],
           ),
