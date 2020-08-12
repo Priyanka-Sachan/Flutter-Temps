@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'product.dart';
 
 class Products with ChangeNotifier {
@@ -110,18 +111,40 @@ class Products with ChangeNotifier {
     return _products.firstWhere((product) => product.id == id);
   }
 
-  void addProduct(Product product) {
-    String timeStamp;
-    if (product.id == null)
-      timeStamp = DateTime.now().toIso8601String();
-    else {
-      timeStamp = product.id;
-      _products.removeWhere((p) => p.id == timeStamp);
-    }
+  Future<void> addProduct(Product product) {
+    const url = 'https://fluttertemps.firebaseio.com/products.json';
+    return http
+        .post(url,
+            body: json.encode({
+              'title': product.title,
+              'description': product.description,
+              'price': product.price,
+              'imageUrl': product.imageUrl,
+              'isFavourite': product.isFavourite
+            }))
+        .then((response) {
+      _products.insert(
+          0,
+          Product(
+              id: json.decode(response.body)['name'],
+              title: product.title,
+              description: product.description,
+              price: product.price,
+              imageUrl: product.imageUrl,
+              isFavourite: product.isFavourite));
+      notifyListeners();
+    }).catchError((error){
+      //Even if we don't catch and throw error here ..we will still get it .
+      print(error.toString());
+      throw error;
+    });
+  }
+
+  void updateProduct(Product product) {
     _products.insert(
-        0,
+        _products.indexWhere((p) => p.id == product.id),
         Product(
-            id: timeStamp,
+            id: product.id,
             title: product.title,
             description: product.description,
             price: product.price,
