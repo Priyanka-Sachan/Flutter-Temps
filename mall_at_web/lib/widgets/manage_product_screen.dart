@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:mallatweb/providers/product.dart';
-import 'package:mallatweb/widgets/edit_product_screen.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/product.dart';
+import './edit_product_screen.dart';
 import '../providers/products_provider.dart';
 import './manage_product_item.dart';
-import 'package:provider/provider.dart';
 
 class ManageProductScreen extends StatelessWidget {
   static final routeName = '/manage-product-screen';
+
+  Future<void> _refreshUserProducts(BuildContext context) async {
+    await Provider.of<Products>(context,listen: false).fetchProducts();
+  }
+
   @override
   Widget build(BuildContext context) {
     final productData = Provider.of<Products>(context);
@@ -45,9 +51,12 @@ class ManageProductScreen extends StatelessWidget {
                 isFavourite: false)),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      body: ListView.builder(
-        itemCount: products.length,
-        itemBuilder: (ctx, index) => ManageProductItem(products[index]),
+      body: RefreshIndicator(
+        onRefresh: () => _refreshUserProducts(context),
+        child: ListView.builder(
+          itemCount: products.length,
+          itemBuilder: (ctx, index) => ManageProductItem(products[index]),
+        ),
       ),
     );
   }

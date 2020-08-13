@@ -27,11 +27,21 @@ class ProductsOverviewItem extends StatelessWidget {
         ),
         header: IconButton(
           icon: Consumer<Product>(
-              builder: (ctx, product, childNotToBeUpdated) => Icon(
-                  product.isFavourite
-                      ? Icons.favorite
-                      : Icons.favorite_border)),
-          onPressed: product.toggleFavourite,
+            builder: (ctx, product, childNotToBeUpdated) => Icon(
+              product.isFavourite ? Icons.favorite : Icons.favorite_border,
+              color: Colors.white,
+            ),
+          ),
+          onPressed: () async {
+            try {
+              await product.toggleFavourite();
+            } catch (error) {
+              Scaffold.of(context).showSnackBar(SnackBar(
+                content: Text('Product cannot be added to WishList.'),
+              ),
+              );
+            }
+          },
           alignment: Alignment.topLeft,
         ),
         footer: GridTileBar(

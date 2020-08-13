@@ -53,37 +53,38 @@ class _EditProductScreenState extends State<EditProductScreen> {
     if (!_imageUrlFocusNode.hasFocus) setState(() {});
   }
 
-  void _saveProduct() {
+  Future<void> _saveProduct() async {
     if (_form.currentState.validate()) {
       _form.currentState.save();
       setState(() {
         _isLoading = true;
       });
-      if (editedProduct.id == null)
-        Provider.of<Products>(context, listen: false)
-            .addProduct(editedProduct)
-            .catchError((error) {
-          return showDialog<Null>(
-              context: context,
-              builder: (ctx) => AlertDialog(
-                    title: Text('An Error Occurred.'),
-                    content: Text('Something went wrong.'),
-                    actions: <Widget>[
-                      FlatButton(
-                        child: Text('OKAY'),
-                        onPressed: () => Navigator.of(ctx).pop(),
-                      )
-                    ],
-                  ));
-        }).then((_) {
-          setState(() {
-            _isLoading = false;
-          });
-          Navigator.of(context).pop();
+      try {
+        if (editedProduct.id == null)
+          await Provider.of<Products>(context, listen: false)
+              .addProduct(editedProduct);
+        else
+          await Provider.of<Products>(context, listen: false)
+              .updateProduct(editedProduct);
+      } catch (error) {
+        await showDialog<Null>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+                  title: Text('An Error Occurred.'),
+                  content: Text('Something went wrong.'),
+                  actions: <Widget>[
+                    FlatButton(
+                      child: Text('OKAY'),
+                      onPressed: () => Navigator.of(ctx).pop(),
+                    )
+                  ],
+                ));
+      } finally {
+        setState(() {
+          _isLoading = false;
         });
-      else
-        Provider.of<Products>(context, listen: false)
-            .updateProduct(editedProduct);
+        Navigator.of(context).pop();
+      }
     }
   }
 

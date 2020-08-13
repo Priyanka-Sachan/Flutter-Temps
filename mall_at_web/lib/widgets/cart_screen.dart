@@ -6,9 +6,15 @@ import '../providers/orders.dart';
 import '../providers/cart.dart';
 import './cart_item.dart';
 
-class CartScreen extends StatelessWidget {
+class CartScreen extends StatefulWidget {
   static const routeName = '/cart-screen';
 
+  @override
+  _CartScreenState createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  bool _isLoading = false;
   @override
   Widget build(BuildContext context) {
     final cart = Provider.of<Cart>(context);
@@ -17,9 +23,7 @@ class CartScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: IconThemeData(
-            color: Theme.of(context).accentColor
-        ),
+        iconTheme: IconThemeData(color: Theme.of(context).accentColor),
         actions: <Widget>[
           IconButton(
             icon: Icon(
@@ -41,22 +45,25 @@ class CartScreen extends StatelessWidget {
         children: <Widget>[
           Expanded(
             flex: 1,
-            child: cart.cartProducts.length==0?Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Icon(
-                  Icons.shopping_cart,
-                  size:300
-                ),
-                Text('Your cart is empty!',
-                style: Theme.of(context).textTheme.headline4,)
-              ],
-            ):ListView.builder(
-              itemBuilder: (ctx, index) =>
-                  CartItem(cart.cartProducts.values.toList()[index]),
-              itemCount: cart.getCartCount(),
-            ),
+            child: cart.cartProducts.length == 0
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(Icons.shopping_cart, size: 300),
+                      Text(
+                        'Your cart is empty!',
+                        style: Theme.of(context).textTheme.headline4,
+                      )
+                    ],
+                  )
+                : _isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                        itemBuilder: (ctx, index) =>
+                            CartItem(cart.cartProducts.values.toList()[index]),
+                        itemCount: cart.getCartCount(),
+                      ),
           ),
           Row(
             mainAxisSize: MainAxisSize.max,
@@ -74,12 +81,28 @@ class CartScreen extends StatelessWidget {
                   'ORDER NOW',
                   style: Theme.of(context).textTheme.headline6,
                 ),
-                onPressed: () {
+                onPressed: () async {
+                  setState(() {
+                    _isLoading = true;
+                  });
                   if (cart.cartProducts.length > 0) {
-                    Provider.of<Orders>(context, listen: false).addOrder(
-                        cart.cartProducts.values.toList(), cart.totalAmount);
-                    cart.clearCart();
-                    Navigator.of(context).pushNamed(OrdersScreen.routeName);
+                    try {
+                      await Provider.of<Orders>(context, listen: false)
+                          .addOrder(cart.cartProducts.values.toList(),
+                              cart.totalAmount);
+                      cart.clearCart();
+                      setState(() {
+                        _isLoading = false;
+                      });
+                      Navigator.of(context).pushNamed(OrdersScreen.routeName);
+                    } catch (error) {
+                      setState(() {
+                        _isLoading=false;
+                      });
+                      Scaffold.of(context).showSnackBar(SnackBar(
+                        content: Text('Your order cannot be placed.'),
+                      ));
+                    }
                   }
                 },
               )

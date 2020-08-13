@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import './manage_product_screen.dart';
 import 'package:provider/provider.dart';
 
+import './manage_product_screen.dart';
 import './cart_screen.dart';
 import '../providers/cart.dart';
 import './badge.dart';
 import '../providers/products_provider.dart';
 import './products_overview_item.dart';
 
-enum filterOptions { Favourites, All,Add }
+enum filterOptions { Favourites, All, Add }
 
 class ProductsOverviewScreen extends StatefulWidget {
   @override
@@ -17,6 +17,33 @@ class ProductsOverviewScreen extends StatefulWidget {
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   bool _showFavourites = false;
+  bool _init = false;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    _init = true;
+    //Other ways to use context in init..
+//    Future.delayed(Duration.zero)
+//        .then((value) => Provider.of<Products>(context).fetchProducts());
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (_init) {
+      setState(() {
+        _isLoading = true;
+      });
+      Provider.of<Products>(context).fetchProducts().then((value) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+      _init = false;
+    }
+    super.didChangeDependencies();
+  }
 
   void navigateToCart() {
     Navigator.of(context).pushNamed(CartScreen.routeName);
@@ -65,10 +92,11 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
               setState(() {
                 if (selectedValue == filterOptions.Favourites)
                   _showFavourites = true;
-                else if(selectedValue == filterOptions.All)
+                else if (selectedValue == filterOptions.All)
                   _showFavourites = false;
                 else {
-                  Navigator.of(context).pushNamed(ManageProductScreen.routeName);
+                  Navigator.of(context)
+                      .pushNamed(ManageProductScreen.routeName);
                 }
               });
             },
@@ -93,14 +121,16 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
           ),
         ],
       ),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(8),
-        itemBuilder: (ctx, index) => ChangeNotifierProvider.value(
-            value: products[index], child: ProductsOverviewItem()),
-        itemCount: products.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, crossAxisSpacing: 8, mainAxisSpacing: 8),
-      ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : GridView.builder(
+              padding: const EdgeInsets.all(8),
+              itemBuilder: (ctx, index) => ChangeNotifierProvider.value(
+                  value: products[index], child: ProductsOverviewItem()),
+              itemCount: products.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, crossAxisSpacing: 8, mainAxisSpacing: 8),
+            ),
     );
   }
 }
