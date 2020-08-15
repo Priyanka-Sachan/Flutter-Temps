@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../providers/auth.dart';
+import './auth_screen.dart';
 import 'package:provider/provider.dart';
 
 import './manage_product_screen.dart';
@@ -8,9 +10,12 @@ import './badge.dart';
 import '../providers/products_provider.dart';
 import './products_overview_item.dart';
 
-enum filterOptions { Favourites, All, Add }
+enum menuOptions { Favourites, All, Add ,LogOut}
 
 class ProductsOverviewScreen extends StatefulWidget {
+
+  static const routeName='/products-overview-screen';
+
   @override
   _ProductsOverviewScreenState createState() => _ProductsOverviewScreenState();
 }
@@ -51,7 +56,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final productsData = Provider.of<Products>(context, listen: false);
+    final productsData = Provider.of<Products>(context);
     final products = _showFavourites
         ? productsData.getFavouriteProducts()
         : productsData.getProducts();
@@ -88,15 +93,19 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
             padding: EdgeInsets.all(8),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            onSelected: (filterOptions selectedValue) {
+            onSelected: (menuOptions selectedValue) {
               setState(() {
-                if (selectedValue == filterOptions.Favourites)
+                if (selectedValue == menuOptions.Favourites)
                   _showFavourites = true;
-                else if (selectedValue == filterOptions.All)
+                else if (selectedValue == menuOptions.All)
                   _showFavourites = false;
-                else {
+                else if(selectedValue==menuOptions.Add) {
                   Navigator.of(context)
                       .pushNamed(ManageProductScreen.routeName);
+                }
+                else{
+                  Provider.of<Auth>(context,listen: false).logOut();
+                  //Navigator.of(context).pushNamed(AuthScreen.routeName);
                 }
               });
             },
@@ -107,15 +116,19 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
             itemBuilder: (ctx) => [
               PopupMenuItem(
                 child: Text('Only Favourites'),
-                value: filterOptions.Favourites,
+                value: menuOptions.Favourites,
               ),
               PopupMenuItem(
                 child: Text('Show All'),
-                value: filterOptions.All,
+                value: menuOptions.All,
               ),
               PopupMenuItem(
                 child: Text('Your Products'),
-                value: filterOptions.Add,
+                value: menuOptions.Add,
+              ),
+              PopupMenuItem(
+                child: Text('Log Out'),
+                value: menuOptions.LogOut,
               ),
             ],
           ),

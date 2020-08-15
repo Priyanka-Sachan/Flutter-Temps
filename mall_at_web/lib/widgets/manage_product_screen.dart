@@ -10,13 +10,11 @@ class ManageProductScreen extends StatelessWidget {
   static final routeName = '/manage-product-screen';
 
   Future<void> _refreshUserProducts(BuildContext context) async {
-    await Provider.of<Products>(context,listen: false).fetchProducts();
+    await Provider.of<Products>(context, listen: false).fetchMyProducts();
   }
 
   @override
   Widget build(BuildContext context) {
-    final productData = Provider.of<Products>(context);
-    final products = productData.getProducts();
     return Scaffold(
       backgroundColor: Colors.pink.shade50,
       appBar: AppBar(
@@ -51,12 +49,23 @@ class ManageProductScreen extends StatelessWidget {
                 isFavourite: false)),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      body: RefreshIndicator(
-        onRefresh: () => _refreshUserProducts(context),
-        child: ListView.builder(
-          itemCount: products.length,
-          itemBuilder: (ctx, index) => ManageProductItem(products[index]),
-        ),
+      body: FutureBuilder(
+        future: _refreshUserProducts(context),
+        builder: (ctx, snapshot) =>
+            snapshot.connectionState == ConnectionState.waiting
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () => _refreshUserProducts(context),
+                    child: Consumer<Products>(
+                      builder:(ctx,products,child)=> ListView.builder(
+                        itemCount: products.getMyProducts().length,
+                        itemBuilder: (ctx, index) =>
+                            ManageProductItem(products.getMyProducts()[index]),
+                      ),
+                    ),
+                  ),
       ),
     );
   }

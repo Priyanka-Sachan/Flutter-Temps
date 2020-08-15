@@ -98,14 +98,54 @@ class Products with ChangeNotifier {
 //        imageUrl:
 //            "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRlShSQPlz98nSQXtjbfQymM4a5mbQlLPgYIg&usqp=CAU")
   ];
+  List<Product> _myProducts = [];
+  String _authToken;
+  String _userId;
+  Products(this._authToken, this._userId, this._products);
 
   Future<void> fetchProducts() async {
-    const url = 'https://fluttertemps.firebaseio.com/products.json';
+    final productsUrl =
+        'https://fluttertemps.firebaseio.com/products.json?auth=$_authToken';
+    final favouritesUrl =
+        'https://fluttertemps.firebaseio.com/users/$_userId/favourites.json?auth=$_authToken';
     try {
-      final response = await http.get(url);
-      final responseBody = json.decode(response.body) as Map<String, dynamic>;
+      final productsResponse = await http.get(productsUrl);
+      final productsResponseBody =
+          json.decode(productsResponse.body) as Map<String, dynamic>;
+      if (productsResponseBody != null) {
+        final favouritesResponse = await http.get(favouritesUrl);
+        final favouritesResponseBody = json.decode(favouritesResponse.body);
+        final List<Product> loadedProducts = [];
+        productsResponseBody.forEach((key, value) {
+          loadedProducts.insert(
+              0,
+              Product(
+                  id: key,
+                  title: value['title'],
+                  description: value['description'],
+                  price: value['price'],
+                  imageUrl: value['imageUrl'],
+                  isFavourite: favouritesResponseBody == null
+                      ? false
+                      : favouritesResponseBody[key] ?? false));
+        });
+        _products = loadedProducts;
+        notifyListeners();
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  Future<void> fetchMyProducts() async {
+    final productsUrl =
+        'https://fluttertemps.firebaseio.com/products.json?auth=$_authToken&&orderBy="creatorId"&&equalTo="$_userId"';
+    try {
+      final productsResponse = await http.get(productsUrl);
+      final productsResponseBody =
+          json.decode(productsResponse.body) as Map<String, dynamic>;
       final List<Product> loadedProducts = [];
-      responseBody.forEach((key, value) {
+      productsResponseBody.forEach((key, value) {
         loadedProducts.insert(
             0,
             Product(
@@ -114,9 +154,9 @@ class Products with ChangeNotifier {
                 description: value['description'],
                 price: value['price'],
                 imageUrl: value['imageUrl'],
-                isFavourite: value['isFavourite']));
+                isFavourite: false));
       });
-      _products = loadedProducts;
+      _myProducts = loadedProducts;
       notifyListeners();
     } catch (error) {
       throw error;
@@ -125,6 +165,10 @@ class Products with ChangeNotifier {
 
   List<Product> getProducts() {
     return _products;
+  }
+
+  List<Product> getMyProducts() {
+    return _myProducts;
   }
 
   List<Product> getFavouriteProducts() {
@@ -136,7 +180,8 @@ class Products with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    const url = 'https://fluttertemps.firebaseio.com/products.json';
+    final url =
+        'https://fluttertemps.firebaseio.com/products.json?auth=$_authToken';
     try {
       final response = await http.post(url,
           body: json.encode({
@@ -144,7 +189,7 @@ class Products with ChangeNotifier {
             'description': product.description,
             'price': product.price,
             'imageUrl': product.imageUrl,
-            'isFavourite': product.isFavourite
+            'creatorId': _userId
           }));
       _products.insert(
           0,
@@ -153,8 +198,15 @@ class Products with ChangeNotifier {
               title: product.title,
               description: product.description,
               price: product.price,
-              imageUrl: product.imageUrl,
-              isFavourite: product.isFavourite));
+              imageUrl: product.imageUrl));
+      _myProducts.insert(
+          0,
+          Product(
+              id: json.decode(response.body)['name'],
+              title: product.title,
+              description: product.description,
+              price: product.price,
+              imageUrl: product.imageUrl));
       notifyListeners();
     } catch (error) {
       print(error.toString());
@@ -164,7 +216,7 @@ class Products with ChangeNotifier {
 
   Future<void> updateProduct(Product product) async {
     String url =
-        'https://fluttertemps.firebaseio.com/products/${product.id}.json';
+        'https://fluttertemps.firebaseio.com/products/${product.id}.json?auth=$_authToken';
     try {
       await http.patch(url,
           body: json.encode({
@@ -182,8 +234,17 @@ class Products with ChangeNotifier {
               title: product.title,
               description: product.description,
               price: product.price,
-              imageUrl: product.imageUrl,
-              isFavourite: product.isFavourite));
+              imageUrl: product.imageUrl));
+      i = _myProducts.indexWhere((p) => p.id == product.id);
+      _myProducts.removeAt(i);
+      _myProducts.insert(
+          i,
+          Product(
+              id: product.id,
+              title: product.title,
+              description: product.description,
+              price: product.price,
+              imageUrl: product.imageUrl));
       notifyListeners();
     } catch (error) {
       throw error;
@@ -191,20 +252,22 @@ class Products with ChangeNotifier {
   }
 
   //Optimistic Update
-  Future<void> removeProduct(Product product) async{
-    String url = 'https://fluttertemps.firebaseio.com/products/${product.id}.json';
+  Future<void> removeProduct(Product product) async {
+    String url =
+        'https://fluttertemps.firebaseio.com/products/${product.id}.json?auth=$_authToken';
     int existingProductIndex = _products.indexOf(product);
+    int existingMyProductIndex = _myProducts.indexOf(product);
     Product existingProduct = product;
-    _products.remove(product);
+    _products.removeAt(_products.indexWhere((p) => p.id == product.id));
+    _myProducts.remove(product);
     notifyListeners();
-    print('notify product dum remove');
-    final response=await http.delete(url);
-      if (response.statusCode >= 400) {
-        _products.insert(existingProductIndex, existingProduct);
-        notifyListeners();
-        print('notify product remove');
-        throw Exception('Error: ${response.statusCode}');
-      }
+    final response = await http.delete(url);
+    if (response.statusCode >= 400) {
+      _products.insert(existingProductIndex, existingProduct);
+      _myProducts.insert(existingMyProductIndex, existingProduct);
+      notifyListeners();
+      throw Exception('Error: ${response.statusCode}');
+    }
     existingProduct = null;
   }
 }

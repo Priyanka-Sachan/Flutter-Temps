@@ -18,18 +18,12 @@ class Product with ChangeNotifier {
       this.imageUrl,
       this.isFavourite = false});
 
-  Future<void> toggleFavourite() async {
-    String url = 'https://fluttertemps.firebaseio.com/products/$id.json';
+  Future<void> toggleFavourite(String authToken, String userId) async {
+    String url =
+        'https://fluttertemps.firebaseio.com/users/$userId/favourites/$id.json?auth=$authToken';
     isFavourite = !isFavourite;
     notifyListeners();
-    final response = await http.patch(url,
-        body: json.encode({
-          'title': title,
-          'description': description,
-          'price': price,
-          'imageUrl': imageUrl,
-          'isFavourite': isFavourite
-        }));
+    final response = await http.put(url, body: json.encode(isFavourite));
     if (response.statusCode >= 400) {
       isFavourite = !isFavourite;
       notifyListeners();
